@@ -7,6 +7,21 @@ from datetime import datetime
 from logger import setup_logging
 from utils import read_json, write_json
 
+data_dict = {
+    'cifar10': 10,
+    'cifar100': 100,
+    'cub': 200,
+    'imagenet': 1000,
+    'inat': 8142,
+    'fgvc': 100,
+    'dogs': 120,
+    'cars': 196,
+    'flowers': 102,
+    'dtd': 47,
+    'caltech101': 102,
+    'places': 365,
+    'fruits': 24,
+}
 
 class ConfigParser:
     def __init__(self, config, resume=None, modification=None, load_crt=None, run_id=None):
@@ -80,6 +95,16 @@ class ConfigParser:
         if args.config and resume:
             # update new config for fine-tuning
             config.update(read_json(args.config))
+        if args.dataset:
+            dataset = args.dataset
+            if 'cifar' in dataset:
+                config['name'] = config['name'].replace('DEFAULT', (dataset + '_' + (str)(args.imb_ratio)))
+                config['data_loader']['imb_ratio'] = args.imb_ratio
+            config['name'] = config['name'].replace('DEFAULT', dataset)
+            config['arch']['args']['num_classes'] = data_dict[dataset]
+            config['data_loader']['type'] = dataset
+            if dataset in ['places', 'inat', 'imagenet']:
+                config['data_loader']['args']['num_workers'] = 16
 
         # parse custom cli options into dictionary
         modification = {opt.target : getattr(args, _get_opt_name(opt.flags)) for opt in options}
