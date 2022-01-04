@@ -179,7 +179,8 @@ class BasicBlock(nn.Module):
 
 class reactnet(nn.Module):
     requires_target = False
-    def __init__(self, num_experts, use_norm=None, use_experts=None, s=30, num_classes=10, reduce_dimension=None):
+    def __init__(self, num_experts, use_norm=None, use_experts=None, s=30, num_classes=10, reduce_dimension=None,
+                 returns_feat=False):
         super(reactnet, self).__init__()
 
         self.conv1 = firstconv3x3(3, 32, 2)
@@ -212,6 +213,7 @@ class reactnet(nn.Module):
             self.use_experts = [int(item) for item in use_experts.split(",")]
 
         self.s = s
+        self.returns_feat = returns_feat
 
     def _make_layer(self, block, in_planes, out_planes, strides):
         assert len(in_planes) - len(out_planes) == 0
@@ -237,6 +239,7 @@ class reactnet(nn.Module):
         x = (self.experts[ind])(x)
         x = F.avg_pool2d(x, x.size()[3])
         x = x.view(x.size(0), -1)
+        self.feat.append(x)
         x = (self.linears[ind])(x)
         x = x * self.s
         return x
@@ -247,6 +250,7 @@ class reactnet(nn.Module):
         else:
             use_experts = self.use_experts
         outs = []
+        self.feat = []
         out = self.conv1(x)
         out = self.shared_backbone(out)
 
@@ -254,7 +258,16 @@ class reactnet(nn.Module):
             outs.append(self._separate_part(out, ind))
         self.logits = outs
         final_out = torch.stack(outs, dim=1).mean(dim=1)
-        return final_out
+
+        if self.returns_feat:
+            return {
+                "output": final_out,
+                "feat": torch.stack(self.feat, dim=1),
+                "logits": torch.stack(self.logits, dim=1)
+
+            }
+        else:
+            return final_out
 
 
 class Classifier(nn.Module):

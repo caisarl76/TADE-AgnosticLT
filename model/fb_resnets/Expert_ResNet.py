@@ -12,7 +12,6 @@ Copyright (c) 2019, Zhongqi Miao
 All rights reserved.
 """
 
-
 import math
 import torch
 import torch.nn as nn
@@ -20,10 +19,12 @@ import torch.nn.functional as F
 
 from utils import autocast
 
+
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
+
 
 class NormedLinear(nn.Module):
 
@@ -35,6 +36,7 @@ class NormedLinear(nn.Module):
     def forward(self, x):
         out = F.normalize(x, dim=1).mm(F.normalize(self.weight, dim=0))
         return out
+
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -66,7 +68,8 @@ class BasicBlock(nn.Module):
         out = self.relu(out)
 
         return out
-    
+
+
 class Bottleneck(nn.Module):
     expansion = 4
 
@@ -105,9 +108,12 @@ class Bottleneck(nn.Module):
 
         return out
 
+
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_experts, dropout=None, num_classes=1000, use_norm=False, reduce_dimension=False, layer3_output_dim=None, layer4_output_dim=None, share_layer3=False, returns_feat=False, s=30):
+    def __init__(self, block, layers, num_experts, dropout=None, num_classes=1000, use_norm=False,
+                 reduce_dimension=False, layer3_output_dim=None, layer4_output_dim=None, share_layer3=False,
+                 returns_feat=False, s=30):
         self.inplanes = 64
         self.num_experts = num_experts
         super(ResNet, self).__init__()
@@ -138,12 +144,14 @@ class ResNet(nn.Module):
         if self.share_layer3:
             self.layer3 = self._make_layer(block, layer3_output_dim, layers[2], stride=2)
         else:
-            self.layer3s = nn.ModuleList([self._make_layer(block, layer3_output_dim, layers[2], stride=2) for _ in range(num_experts)])
+            self.layer3s = nn.ModuleList(
+                [self._make_layer(block, layer3_output_dim, layers[2], stride=2) for _ in range(num_experts)])
         self.inplanes = self.next_inplanes
-        self.layer4s = nn.ModuleList([self._make_layer(block, layer4_output_dim, layers[3], stride=2) for _ in range(num_experts)])
+        self.layer4s = nn.ModuleList(
+            [self._make_layer(block, layer4_output_dim, layers[3], stride=2) for _ in range(num_experts)])
         self.inplanes = self.next_inplanes
         self.avgpool = nn.AvgPool2d(7, stride=1)
-        
+
         self.use_dropout = True if dropout else False
 
         if self.use_dropout:
@@ -159,11 +167,13 @@ class ResNet(nn.Module):
                 m.bias.data.zero_()
 
         if use_norm:
-            self.linears = nn.ModuleList([NormedLinear(layer4_output_dim * block.expansion, num_classes) for _ in range(num_experts)])
+            self.linears = nn.ModuleList(
+                [NormedLinear(layer4_output_dim * block.expansion, num_classes) for _ in range(num_experts)])
         else:
-            self.linears = nn.ModuleList([nn.Linear(layer4_output_dim * block.expansion, num_classes) for _ in range(num_experts)])
+            self.linears = nn.ModuleList(
+                [nn.Linear(layer4_output_dim * block.expansion, num_classes) for _ in range(num_experts)])
             s = 1
-        
+
         self.s = s
 
         self.returns_feat = returns_feat
@@ -203,7 +213,7 @@ class ResNet(nn.Module):
         x = (self.layer4s[ind])(x)
 
         x = self.avgpool(x)
-        
+
         x = x.view(x.size(0), -1)
 
         if self.use_dropout:
@@ -235,7 +245,7 @@ class ResNet(nn.Module):
 
         if self.returns_feat:
             return {
-                "output": final_out, 
+                "output": final_out,
                 "feat": torch.stack(self.feat, dim=1),
                 "logits": torch.stack(outs, dim=1)
             }
