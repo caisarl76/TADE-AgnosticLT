@@ -179,7 +179,6 @@ class BasicBlock(nn.Module):
 
 class reactnet(nn.Module):
     requires_target = False
-
     def __init__(self, num_experts, use_norm=None, use_experts=None, s=30, num_classes=10, reduce_dimension=None):
         super(reactnet, self).__init__()
 
