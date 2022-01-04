@@ -19,7 +19,8 @@
             "batch_size": 64,
             "shuffle": true,
             "num_workers": 12
-        }
+        },
+        "imb_ratio": 0.1
     },
     "optimizer": {
         "type": "Adam",
