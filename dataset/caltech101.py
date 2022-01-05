@@ -118,16 +118,25 @@ class ImbalanceCaltech101(VisionDataset):
         return cls_num_list
 
     def __getitem__(self, index):
-        img = Image.open(self.samples[index])
+        img = Image.open(self.samples[index]).convert("RGB")
 
         target = []
         target.append(self.targets[index])
         target = torch.tensor(target[0]).long()
 
         if self.transform is not None:
-            img = self.transform(img)
-        if img.shape == torch.Size([1, 224, 224]):
-            img = img.repeat(3, 1, 1)
+            if isinstance(self.transform, list):
+                if type(self.transform) == list:
+                    samples = []
+                    seed = np.random.randint(2147483647)
+                    for transform in self.transform:
+                        random.seed(seed)
+                        torch.random.manual_seed(seed)
+                        sample = transform(img)
+                        samples.append(sample)
+                    return samples, target
+            else:
+                img = self.transform(img)
         if self.target_transform is not None:
             target = self.target_transform(target)
 
