@@ -4,6 +4,7 @@ import os
 import PIL
 import torch.optim
 from torchvision import datasets, transforms
+from torchvision.transforms import InterpolationMode
 
 from .fruits import Fruits
 from .places import PlacesLT
