@@ -179,8 +179,7 @@ class BasicBlock(nn.Module):
 
 class reactnet(nn.Module):
     requires_target = False
-    def __init__(self, num_experts, use_norm=None, use_experts=None, s=30, num_classes=10, reduce_dimension=None,
-                 returns_feat=False):
+    def __init__(self, num_experts, use_norm=None, s=30, num_classes=10, returns_feat=False):
         super(reactnet, self).__init__()
 
         self.conv1 = firstconv3x3(3, 32, 2)
@@ -204,13 +203,6 @@ class reactnet(nn.Module):
         else:
             self.linears = nn.ModuleList([nn.Linear(1024, num_classes) for _ in range(num_experts)])
             s = 1
-
-        if use_experts is None:
-            self.use_experts = list(range(num_experts))
-        elif use_experts == "rand":
-            self.use_experts = None
-        else:
-            self.use_experts = [int(item) for item in use_experts.split(",")]
 
         self.s = s
         self.returns_feat = returns_feat
@@ -245,16 +237,12 @@ class reactnet(nn.Module):
         return x
 
     def forward(self, x):
-        if self.use_experts is None:
-            use_experts = random.sample(range(self.num_experts), self.num_experts - 1)
-        else:
-            use_experts = self.use_experts
         outs = []
         self.feat = []
         out = self.conv1(x)
         out = self.shared_backbone(out)
 
-        for ind in use_experts:
+        for ind in range(self.num_experts):
             outs.append(self._separate_part(out, ind))
         self.logits = outs
         final_out = torch.stack(outs, dim=1).mean(dim=1)
