@@ -115,8 +115,8 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
         head_class_idx = [0, 390]
         med_class_idx = [390, 835]
         tail_class_idx = [835, 1000]
-        txt_train = f'/data/imagenet/ImageNet_LT_train.txt'
-        txt_test = f'/data/imagenet/ImageNet_LT_test.txt'
+        txt_train = os.path.join(data, 'ImageNet_LT_train.txt')
+        txt_test = os.path.join(data, 'ImageNet_LT_test.txt')
         if transform_train is None:
             if isinstance(train_img_size, list) or isinstance(train_img_size, tuple):
                 transform_train = []
