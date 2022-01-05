@@ -15,6 +15,7 @@ from .dogs import Dogs
 from .flowers import Flowers
 from .imabalance_cub import Cub2011
 from .imbalance_cifar import ImbalanceCIFAR100, ImbalanceCIFAR10
+from .caltech101 import ImbalanceCaltech101
 from .inat import INaturalist
 from .imagenet import ImageNetLT
 
