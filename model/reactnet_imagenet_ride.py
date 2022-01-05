@@ -179,7 +179,7 @@ class BasicBlock(nn.Module):
 
 class reactnet(nn.Module):
     requires_target = False
-    def __init__(self, num_experts, use_norm=None, s=30, num_classes=10, returns_feat=False):
+    def __init__(self, num_experts, use_norm=None, s=30, num_classes=10, reduce_dimension=False, returns_feat=False):
         super(reactnet, self).__init__()
 
         self.conv1 = firstconv3x3(3, 32, 2)
