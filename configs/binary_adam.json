@@ -16,7 +16,7 @@
         "type": "DEFAULT",
         "args":{
             "data_dir": "./data/",
-            "batch_size": 64,
+            "batch_size": 128,
             "shuffle": true,
             "num_workers": 4
         },

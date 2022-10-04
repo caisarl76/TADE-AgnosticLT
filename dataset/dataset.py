@@ -118,23 +118,13 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
         txt_train = os.path.join(data, 'ImageNet_LT_train.txt')
         txt_test = os.path.join(data, 'ImageNet_LT_test.txt')
         if transform_train is None:
-            if isinstance(train_img_size, list) or isinstance(train_img_size, tuple):
-                transform_train = []
-                for img_size in train_img_size:
-                    transform_train.append(transforms.Compose([transforms.RandomResizedCrop(img_size)]))
-                for trans in transform_train:
-                    trans.transforms.append(transforms.RandomHorizontalFlip())
-                    trans.transforms.append(transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0))
-                    trans.transforms.append(transforms.ToTensor())
-                    trans.transforms.append(transforms.Normalize(mean=IMGNET_MEAN, std=IMGNET_STD))
-            else:
-                transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BICUBIC),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=IMGNET_MEAN, std=IMGNET_STD)
-                ])
+            transform_train = transforms.Compose([
+                transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BICUBIC),
+                transforms.RandomHorizontalFlip(),
+                transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=IMGNET_MEAN, std=IMGNET_STD)
+            ])
         else:
             for idx, trans in enumerate(transform_train):
                 transform_train[idx].transforms.append(transforms.Normalize(mean=IMGNET_MEAN, std=IMGNET_STD))
@@ -171,23 +161,13 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
         txt_train = os.path.join(data, 'iNaturalist18_train.txt')
         txt_test = os.path.join(data, 'iNaturalist18_val.txt')
         if transform_train is None:
-            if isinstance(train_img_size, list) or isinstance(train_img_size, tuple):
-                transform_train = []
-                for img_size in train_img_size:
-                    transform_train.append(transforms.Compose([transforms.RandomResizedCrop(img_size)]))
-                for trans in transform_train:
-                    trans.transforms.append(transforms.RandomHorizontalFlip())
-                    trans.transforms.append(transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0))
-                    trans.transforms.append(transforms.ToTensor())
-                    trans.transforms.append(transforms.Normalize(mean=INAT_MEAN, std=INAT_STD))
-            else:
-                transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BICUBIC),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=INAT_MEAN, std=INAT_STD)
-                ])
+            transform_train = transforms.Compose([
+                transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BICUBIC),
+                transforms.RandomHorizontalFlip(),
+                transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=INAT_MEAN, std=INAT_STD)
+            ])
         else:
             for idx, trans in enumerate(transform_train):
                 transform_train[idx].transforms.append(transforms.Normalize(mean=INAT_MEAN, std=INAT_STD))
