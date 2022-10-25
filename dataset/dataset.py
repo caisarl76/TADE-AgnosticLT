@@ -4,7 +4,6 @@ import math
 import PIL
 import torch.optim
 from torchvision import datasets, transforms
-from torchvision.transforms import InterpolationMode
 
 from .fruits import Fruits
 from .places import PlacesLT
@@ -131,7 +130,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
         print(transform_train)
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=IMGNET_MEAN, std=IMGNET_STD)
@@ -162,7 +161,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
         txt_test = os.path.join(data, 'iNaturalist18_val.txt')
         if transform_train is None:
             transform_train = transforms.Compose([
-                transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                transforms.RandomResizedCrop(train_img_size),
                 transforms.RandomHorizontalFlip(),
                 transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                 transforms.ToTensor(),
@@ -175,7 +174,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=INAT_MEAN, std=INAT_STD)
@@ -212,7 +211,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=CIFAR_MEAN, std=CIFAR_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.Resize(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.Resize(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     # transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     transforms.ToTensor(),
@@ -225,7 +224,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(val_img_size, interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=CIFAR_MEAN, std=CIFAR_STD)
             ])
@@ -260,7 +259,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=CIFAR_MEAN, std=CIFAR_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.Resize(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.Resize(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     # transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     transforms.ToTensor(),
@@ -273,7 +272,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(val_img_size, interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=CIFAR_MEAN, std=CIFAR_STD)
             ])
@@ -308,7 +307,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=FGVC_MEAN, std=FGVC_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.RandomResizedCrop(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     transforms.ToTensor(),
@@ -321,7 +320,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=FGVC_MEAN, std=FGVC_STD)
@@ -354,7 +353,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=DOGS_MEAN, std=DOGS_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.RandomResizedCrop(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     # transforms.RandomAffine(30),
@@ -370,7 +369,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=DOGS_MEAN, std=DOGS_STD)
@@ -402,7 +401,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=CARS_MEAN, std=CARS_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.RandomResizedCrop(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     transforms.ToTensor(),
@@ -415,7 +414,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=CARS_MEAN, std=CARS_STD)
@@ -448,7 +447,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=FLOWERS_MEAN, std=FLOWERS_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.RandomResizedCrop(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     # transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     transforms.ToTensor(),
@@ -461,7 +460,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=FLOWERS_MEAN, std=FLOWERS_STD)
@@ -493,7 +492,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=DTD_MEAN, std=DTD_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.RandomResizedCrop(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     transforms.ToTensor(),
@@ -505,7 +504,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
         print(transform_train)
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=DTD_MEAN, std=DTD_STD)
@@ -537,7 +536,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=CALTECH101_MEAN, std=CALTECH101_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.RandomResizedCrop(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     transforms.ToTensor(),
@@ -549,7 +548,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=CALTECH101_MEAN, std=CALTECH101_STD)
@@ -582,7 +581,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=PLACES_MEAN, std=PLACES_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.RandomResizedCrop(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     transforms.ToTensor(),
@@ -594,7 +593,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=PLACES_MEAN, std=PLACES_STD)
@@ -628,7 +627,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
                     trans.transforms.append(transforms.Normalize(mean=FRUIT360_MEAN, std=FRUIT360_STD))
             else:
                 transform_train = transforms.Compose([
-                    transforms.RandomResizedCrop(train_img_size, interpolation=InterpolationMode.BILINEAR),
+                    transforms.RandomResizedCrop(train_img_size),
                     transforms.RandomHorizontalFlip(),
                     transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0),
                     transforms.ToTensor(),
@@ -640,7 +639,7 @@ def get_dataset(data, dataset, imb_ratio, transform_train=None, val_transform=No
 
         if val_transform is None:
             val_transform = transforms.Compose([
-                transforms.Resize(int(math.floor(val_img_size / 0.875)), interpolation=InterpolationMode.BILINEAR),
+                transforms.Resize(int(math.floor(val_img_size / 0.875))),
                 transforms.CenterCrop(val_img_size),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=FRUIT360_MEAN, std=FRUIT360_STD)
