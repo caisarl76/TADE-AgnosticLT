@@ -1,11 +1,10 @@
 {
-    "name": "binary_DEFAULT",
+    "name": "binary_cub",
     "n_gpu": 1,
-
     "arch": {
         "type": "reactnet",
         "args": {
-            "num_classes": 0,
+            "num_classes": 200,
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
@@ -13,26 +12,26 @@
         }
     },
     "data_loader": {
-        "type": "DEFAULT",
-        "args":{
+        "type": "cub",
+        "args": {
             "data_dir": "./data/",
-            "batch_size": 128,
+            "batch_size": 16,
             "shuffle": true,
-            "num_workers": 2
+            "num_workers": 0
         },
         "imb_ratio": 0.1
     },
     "optimizer": {
         "type": "Adam",
-        "args":{
+        "args": {
             "lr": 0.01
         }
     },
     "add_extra_info": true,
     "loss": {
         "type": "DiverseExpertLoss",
-        "args":{
-             "tau": 2
+        "args": {
+            "tau": 2
         }
     },
     "metrics": [

@@ -53,7 +53,6 @@ def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
-
     train_dataset, val_dataset = get_dataset(data=config['data_loader']['args']['data_dir'],
                                              dataset=config['data_loader']['type'],
                                              imb_ratio=config['data_loader']['imb_ratio'])
