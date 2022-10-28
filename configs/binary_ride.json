@@ -1,0 +1,56 @@
+{
+    "name": "binary_RIDE_DEFAULT",
+    "n_gpu": 1,
+
+    "arch": {
+        "type": "reactnet",
+        "args": {
+            "num_classes": 0,
+            "reduce_dimension": true,
+            "use_norm": true,
+            "returns_feat": true,
+            "num_experts": 3
+        }
+    },
+    "data_loader": {
+        "type": "DEFAULT",
+        "args":{
+            "data_dir": "./data/",
+            "batch_size": 128,
+            "shuffle": true,
+            "num_workers": 2
+        },
+        "imb_ratio": 0.1
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args":{
+            "lr": 0.01
+        }
+    },
+    "add_extra_info": true,
+    "loss": {
+        "type": "RIDELoss",
+        "args":{
+             "cls_num_list": null
+        }
+    },
+    "metrics": [
+        "accuracy"
+    ],
+    "lr_scheduler": {
+        "type": "CosineAnnealingLR",
+        "args": {
+            "T_max": 180,
+            "eta_min": 0
+        }
+    },
+    "trainer": {
+        "epochs": 180,
+        "save_dir": "saved/binary_DEFAULT/",
+        "save_period": 180,
+        "verbosity": 2,
+        "monitor": "max val_accuracy",
+        "tensorboard": false
+    }
+}
