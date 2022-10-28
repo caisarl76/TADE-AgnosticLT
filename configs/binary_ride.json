@@ -32,7 +32,8 @@
     "loss": {
         "type": "RIDELoss",
         "args":{
-             "cls_num_list": null
+             "cls_num_list": [],
+            "reweight_epoch": 0
         }
     },
     "metrics": [

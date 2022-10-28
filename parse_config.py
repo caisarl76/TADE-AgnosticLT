@@ -122,7 +122,11 @@ class ConfigParser:
         module_name = self[name]['type']
         module_args = dict(self[name]['args']) if 'args' in self[name] else dict()
         if not allow_override:
-            assert all([k not in module_args for k in kwargs]), 'Overwriting kwargs given in config file is not allowed'
+            for k in kwargs:
+                if not k == 'cls_num_list':
+                    assert k not in module_args
+        # if not allow_override:
+            # assert all([k not in module_args for k in kwargs]), 'Overwriting kwargs given in config file is not allowed'
         module_args.update(kwargs)
         return getattr(module, module_name)(*args, **module_args)
 

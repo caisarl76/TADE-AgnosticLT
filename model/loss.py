@@ -115,9 +115,11 @@ class LDAMLoss(nn.Module):
         final_output = self.get_final_output(output_logits, target)
         return F.cross_entropy(final_output, target, weight=self.per_cls_weights)
 
+
 class RIDELoss(nn.Module):
-    def __init__(self, cls_num_list=None, base_diversity_temperature=1.0, max_m=0.5, s=30, reweight=True, reweight_epoch=-1, 
-        base_loss_factor=1.0, additional_diversity_factor=-0.2, reweight_factor=0.05):
+    def __init__(self, cls_num_list=None, base_diversity_temperature=1.0, max_m=0.5, s=30, reweight=True,
+                 reweight_epoch=-1,
+                 base_loss_factor=1.0, additional_diversity_factor=-0.2, reweight_factor=0.05):
         super().__init__()
         self.base_loss = F.cross_entropy
         self.base_loss_factor = base_loss_factor
@@ -142,28 +144,31 @@ class RIDELoss(nn.Module):
             self.m_list = m_list
             self.s = s
             assert s > 0
-            
+
             if reweight_epoch != -1:
-                idx = 1 # condition could be put in order to set idx
+                idx = 1  # condition could be put in order to set idx
                 betas = [0, 0.9999]
                 effective_num = 1.0 - np.power(betas[idx], cls_num_list)
                 per_cls_weights = (1.0 - betas[idx]) / np.array(effective_num)
                 per_cls_weights = per_cls_weights / np.sum(per_cls_weights) * len(cls_num_list)
-                self.per_cls_weights_enabled = torch.tensor(per_cls_weights, dtype=torch.float, requires_grad=False)   # 这个是logits时算CE loss的weight
+                self.per_cls_weights_enabled = torch.tensor(per_cls_weights, dtype=torch.float,
+                                                            requires_grad=False)  # 这个是logits时算CE loss的weight
             else:
                 self.per_cls_weights_enabled = None
 
             cls_num_list = np.array(cls_num_list) / np.sum(cls_num_list)
             C = len(cls_num_list)  # class number
-            per_cls_weights = C * cls_num_list * reweight_factor + 1 - reweight_factor   #Eq.3
+            per_cls_weights = C * cls_num_list * reweight_factor + 1 - reweight_factor  # Eq.3
 
             # Experimental normalization: This is for easier hyperparam tuning, the effect can be described in the learning rate so the math formulation keeps the same.
             # At the same time, the 1 - max trick that was previously used is not required since weights are already adjusted.
-            per_cls_weights = per_cls_weights / np.max(per_cls_weights)    # the effect can be described in the learning rate so the math formulation keeps the same.
+            per_cls_weights = per_cls_weights / np.max(
+                per_cls_weights)  # the effect can be described in the learning rate so the math formulation keeps the same.
 
             assert np.all(per_cls_weights > 0), "reweight factor is too large: out of bounds"
             # save diversity per_cls_weights
-            self.per_cls_weights_enabled_diversity = torch.tensor(per_cls_weights, dtype=torch.float, requires_grad=False).cuda()  # 这个是logits时算diversity loss的weight
+            self.per_cls_weights_enabled_diversity = torch.tensor(per_cls_weights, dtype=torch.float,
+                                                                  requires_grad=False).cuda()  # 这个是logits时算diversity loss的weight
 
         self.base_diversity_temperature = base_diversity_temperature
         self.additional_diversity_factor = additional_diversity_factor
@@ -172,7 +177,7 @@ class RIDELoss(nn.Module):
         super().to(device)
         if self.m_list is not None:
             self.m_list = self.m_list.to(device)
-        
+
         if self.per_cls_weights_enabled is not None:
             self.per_cls_weights_enabled = self.per_cls_weights_enabled.to(device)
 
@@ -197,10 +202,10 @@ class RIDELoss(nn.Module):
 
         index = torch.zeros_like(x, dtype=torch.uint8, device=x.device)
         index.scatter_(1, target.data.view(-1, 1), 1)
-        
+
         index_float = index.float()
-        batch_m = torch.matmul(self.m_list[None, :], index_float.transpose(0,1))
-        
+        batch_m = torch.matmul(self.m_list[None, :], index_float.transpose(0, 1))
+
         batch_m = batch_m.view((-1, 1))
         x_m = x - batch_m * self.s
 
@@ -214,14 +219,14 @@ class RIDELoss(nn.Module):
         loss = 0
 
         # Adding RIDE Individual Loss for each expert
-        for logits_item in extra_info['logits']:  
+        for logits_item in extra_info['logits']:
             ride_loss_logits = output_logits if self.additional_diversity_factor == 0 else logits_item
             if self.m_list is None:
                 loss += self.base_loss_factor * self.base_loss(ride_loss_logits, target)
             else:
                 final_output = self.get_final_output(ride_loss_logits, target)
                 loss += self.base_loss_factor * self.base_loss(final_output, target, weight=self.per_cls_weights_base)
-            
+
             base_diversity_temperature = self.base_diversity_temperature
 
             if self.per_cls_weights_diversity is not None:
@@ -230,14 +235,16 @@ class RIDELoss(nn.Module):
             else:
                 diversity_temperature = base_diversity_temperature
                 temperature_mean = base_diversity_temperature
-            
+
             output_dist = F.log_softmax(logits_item / diversity_temperature, dim=1)
             with torch.no_grad():
                 # Using the mean takes only linear instead of quadratic time in computing and has only a slight difference so using the mean is preferred here
                 mean_output_dist = F.softmax(output_logits / diversity_temperature, dim=1)
-            
-            loss += self.additional_diversity_factor * temperature_mean * temperature_mean * F.kl_div(output_dist, mean_output_dist, reduction='batchmean')
-        
+
+            loss += self.additional_diversity_factor * temperature_mean * temperature_mean * F.kl_div(output_dist,
+                                                                                                      mean_output_dist,
+                                                                                                      reduction='batchmean')
+
         return loss
   
  
@@ -284,6 +291,43 @@ class DiverseExpertLoss(nn.Module):
         loss += self.base_loss(expert3_logits, target)
    
         return loss
-    
- 
+
+
+class RIDELossWithDistill(nn.Module):
+    def __init__(self, cls_num_list=None, additional_distill_loss_factor=1.0, distill_temperature=1.0,
+                 ride_loss_factor=1.0, **kwargs):
+        super().__init__()
+        self.ride_loss = RIDELoss(cls_num_list=cls_num_list, **kwargs)
+        self.distill_temperature = distill_temperature
+
+        self.ride_loss_factor = ride_loss_factor
+        self.additional_distill_loss_factor = additional_distill_loss_factor
+
+    def to(self, device):
+        super().to(device)
+        self.ride_loss = self.ride_loss.to(device)
+        return self
+
+    def _hook_before_epoch(self, epoch):
+        self.ride_loss._hook_before_epoch(epoch)
+
+    def forward(self, student, target=None, teacher=None, extra_info=None):
+        output_logits = student
+        if extra_info is None:
+            return self.ride_loss(output_logits, target)
+
+        loss = 0
+        num_experts = len(extra_info['logits'])
+        for logits_item in extra_info['logits']:
+            loss += self.ride_loss_factor * self.ride_loss(output_logits, target, extra_info)
+            distill_temperature = self.distill_temperature
+
+            student_dist = F.log_softmax(student / distill_temperature, dim=1)
+            with torch.no_grad():
+                teacher_dist = F.softmax(teacher / distill_temperature, dim=1)
+
+            distill_loss = F.kl_div(student_dist, teacher_dist, reduction='batchmean')
+            distill_loss = distill_temperature * distill_temperature * distill_loss
+            loss += self.additional_distill_loss_factor * distill_loss
+        return loss
      
