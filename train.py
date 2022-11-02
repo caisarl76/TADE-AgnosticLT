@@ -53,7 +53,7 @@ def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
-    if config['data_loader']['type'] in ['places', 'inat', 'imagenet', 'ImageNetLTDataLoader']:
+    if config['data_loader']['type'] in ['places', 'inat', 'imagenet', 'ImageNetLTDataLoader','iNaturalistDataLoader']:
         data_loader = config.init_obj('data_loader', module_data)
         valid_data_loader = data_loader.split_validation()
         cls_num_list = data_loader.cls_num_list
