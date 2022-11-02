@@ -16,7 +16,7 @@
         "type": "iNaturalistDataLoader",
         "args":{
             "data_dir": "./data/inat",
-            "batch_size": 512,
+            "batch_size": 256,
             "shuffle": true,
             "num_workers": 8
         }
