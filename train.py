@@ -53,18 +53,24 @@ def main(config):
     logger = config.get_logger('train')
 
     # setup data_loader instances
-    train_dataset, val_dataset = get_dataset(data=config['data_loader']['args']['data_dir'],
-                                             dataset=config['data_loader']['type'],
-                                             imb_ratio=config['data_loader']['imb_ratio'])
-    data_loader = torch.utils.data.DataLoader(
-        train_dataset,
-        batch_size=config['data_loader']['args']['batch_size'], shuffle=config['data_loader']['args']['shuffle'],
-        num_workers=config['data_loader']['args']['num_workers'], pin_memory=True)
+    if config.dataset in ['places', 'inat', 'imagenet']:
+        data_loader = config.init_obj('data_loader', module_data)
+        valid_data_loader = data_loader.split_validation()
+        cls_num_list = data_loader.cls_num_list
+    else:
+        train_dataset, val_dataset = get_dataset(data=config['data_loader']['args']['data_dir'],
+                                                 dataset=config['data_loader']['type'],
+                                                 imb_ratio=config['data_loader']['imb_ratio'])
+        cls_num_list = train_dataset.get_cls_num_list()
+        data_loader = torch.utils.data.DataLoader(
+            train_dataset,
+            batch_size=config['data_loader']['args']['batch_size'], shuffle=config['data_loader']['args']['shuffle'],
+            num_workers=config['data_loader']['args']['num_workers'], pin_memory=True)
 
-    valid_data_loader = torch.utils.data.DataLoader(
-        val_dataset,
-        batch_size=config['data_loader']['args']['batch_size'], shuffle=False,
-        num_workers=config['data_loader']['args']['num_workers'], pin_memory=True)
+        valid_data_loader = torch.utils.data.DataLoader(
+            val_dataset,
+            batch_size=config['data_loader']['args']['batch_size'], shuffle=False,
+            num_workers=config['data_loader']['args']['num_workers'], pin_memory=True)
 
     # build model architecture, then print to console
     # model = config.init_obj('arch', module_arch)
@@ -74,9 +80,9 @@ def main(config):
     # get function handles of loss and metrics
     loss_class = getattr(module_loss, config["loss"]["type"])
     if hasattr(loss_class, "require_num_experts") and loss_class.require_num_experts:
-        criterion = config.init_obj('loss', module_loss, cls_num_list=train_dataset.get_cls_num_list(), num_experts=config["arch"]["args"]["num_experts"])
+        criterion = config.init_obj('loss', module_loss, cls_num_list=cls_num_list, num_experts=config["arch"]["args"]["num_experts"])
     else:
-        criterion = config.init_obj('loss', module_loss, cls_num_list=train_dataset.get_cls_num_list())
+        criterion = config.init_obj('loss', module_loss, cls_num_list=cls_num_list)
     metrics = [getattr(module_metric, met) for met in config['metrics']]
 
     # build optimizer, learning rate scheduler.  

@@ -1,0 +1,56 @@
+{
+    "name": "binary_RIDE_imagenet",
+    "n_gpu": 1,
+
+    "arch": {
+        "type": "reactnet",
+        "args": {
+            "num_classes": 1000,
+            "reduce_dimension": true,
+            "use_norm": true,
+            "returns_feat": true,
+            "num_experts": 3
+        }
+    },
+    "data_loader": {
+        "type": "ImageNetLTDataLoader",
+        "args":{
+            "data_dir": "./data/imagenet",
+            "batch_size": 16,
+            "shuffle": true,
+            "num_workers": 0
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args":{
+            "lr": 0.01
+        }
+    },
+    "add_extra_info": true,
+    "loss": {
+        "type": "RIDELoss",
+        "args":{
+             "cls_num_list": [],
+            "reweight_epoch": 0
+        }
+    },
+    "metrics": [
+        "accuracy"
+    ],
+    "lr_scheduler": {
+        "type": "CosineAnnealingLR",
+        "args": {
+            "T_max": 180,
+            "eta_min": 0
+        }
+    },
+    "trainer": {
+        "epochs": 180,
+        "save_dir": "saved/binary_imagenet/",
+        "save_period": 180,
+        "verbosity": 2,
+        "monitor": "max val_accuracy",
+        "tensorboard": false
+    }
+}
