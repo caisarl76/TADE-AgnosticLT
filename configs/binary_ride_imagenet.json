@@ -1,6 +1,6 @@
 {
     "name": "binary_RIDE_imagenet",
-    "n_gpu": 1,
+    "n_gpu": 2,
 
     "arch": {
         "type": "reactnet",
@@ -16,9 +16,9 @@
         "type": "ImageNetLTDataLoader",
         "args":{
             "data_dir": "./data/imagenet",
-            "batch_size": 16,
+            "batch_size": 64,
             "shuffle": true,
-            "num_workers": 0
+            "num_workers": 8
         }
     },
     "optimizer": {
