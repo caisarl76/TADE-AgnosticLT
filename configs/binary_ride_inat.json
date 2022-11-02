@@ -1,11 +1,11 @@
 {
-    "name": "binary_RIDE_imagenet",
+    "name": "binary_RIDE_inat",
     "n_gpu": 2,
 
     "arch": {
         "type": "reactnet",
         "args": {
-            "num_classes": 1000,
+            "num_classes": 8142,
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
@@ -13,10 +13,10 @@
         }
     },
     "data_loader": {
-        "type": "ImageNetLTDataLoader",
+        "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "./data/imagenet",
-            "batch_size": 256,
+            "data_dir": "./data/iNaturalist",
+            "batch_size": 512,
             "shuffle": true,
             "num_workers": 8
         }
@@ -47,7 +47,7 @@
     },
     "trainer": {
         "epochs": 180,
-        "save_dir": "saved/binary_imagenet/",
+        "save_dir": "saved/binary_inat/",
         "save_period": 180,
         "verbosity": 2,
         "monitor": "max val_accuracy",
