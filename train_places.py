@@ -1,3 +1,4 @@
+import os
 import argparse
 import collections
 import torch
@@ -6,8 +7,10 @@ import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
+import model.reactnet_imagenet_ride as reactnet
 from parse_config import ConfigParser
 from trainer import Trainer
+from dataset import get_dataset
 
 deterministic = False
 if deterministic:
@@ -49,11 +52,18 @@ def main(config):
 
     # setup data_loader instances
     data_loader = config.init_obj('data_loader', module_data)
+    cls_num_list = data_loader.cls_num_list
     valid_data_loader = data_loader.split_validation()
 
     # build model architecture, then print to console
-    model = config.init_obj('arch', module_arch)
+    # model = config.init_obj('arch', module_arch)
+    model = reactnet.reactnet(**dict(config['arch']['args']))
     logger.info(model)
+    if os.path.isfile(config['arch']['load_weight']):
+        checkpoint = torch.load(config['arch']['load_weight'])
+        model.load_state_dict(checkpoint['state_dict'], strict=False)
+        print('weight load complete')
+
 
     # get function handles of loss and metrics
     loss_class = getattr(module_loss, config["loss"]["type"])
@@ -64,26 +74,34 @@ def main(config):
     metrics = [getattr(module_metric, met) for met in config['metrics']]
 
     # build optimizer, learning rate scheduler.  
-    conv4_params = []
+    expert_params = []
     linear_params =[]
     for pname, p in model.named_parameters():
-        if  'layer4s'  in pname:
-            conv4_params += [p]
+        # if  'layer4s'  in pname:
+        #     conv4_params += [p]
+        # elif 'linears' in pname:
+        #     linear_params += [p]
+        if 'experts.' in pname:
+            expert_params += [p]
         elif 'linears' in pname:
-            linear_params += [p]
-     
-    params_id = list(map(id, conv4_params)) + list(map(id, linear_params))
+            linear_params +=[p]
+
+    params_id = list(map(id, expert_params)) + list(map(id, linear_params))
     base_parameters = list(filter(lambda p:id(p) not in params_id, model.parameters()))
     
-    optimizer = torch.optim.SGD([ {'params': base_parameters, 'lr': config['optimizer']['args']['share_lr']},
-                                  {'params': conv4_params, 'lr': config['optimizer']['args']['share_lr']},
-                                  {'params': linear_params, 'lr': config['optimizer']['args']['lr']}], 
+    # optimizer = torch.optim.SGD([ {'params': base_parameters, 'lr': config['optimizer']['args']['share_lr']},
+    #                               {'params': conv4_params, 'lr': config['optimizer']['args']['share_lr']},
+    #                               {'params': linear_params, 'lr': config['optimizer']['args']['lr']}],
+    #                               lr=config['optimizer']['args']['lr'],
+    #                               momentum=config['optimizer']['args']['momentum'],
+    #                               weight_decay=config['optimizer']['args']['weight_decay'],
+    #                               nesterov=config['optimizer']['args']['nesterov'])
+    optimizer = torch.optim.Adam([ {'params': base_parameters, 'lr': config['optimizer']['args']['share_lr']},
+                                  {'params': expert_params, 'lr': config['optimizer']['args']['share_lr']},
+                                  {'params': linear_params, 'lr': config['optimizer']['args']['lr']}],
                                   lr=config['optimizer']['args']['lr'],
-                                  momentum=config['optimizer']['args']['momentum'],
-                                  weight_decay=config['optimizer']['args']['weight_decay'],
-                                  nesterov=config['optimizer']['args']['nesterov'])
+                                 )
 
- 
     lr_scheduler = learing_rate_scheduler(optimizer, config)
 
     trainer = Trainer(model, criterion, metrics, optimizer,
@@ -103,6 +121,8 @@ if __name__ == '__main__':
                       help='path to latest checkpoint (default: None)')
     args.add_argument('-d', '--device', default=None, type=str,
                       help='indices of GPUs to enable (default: all)')
+    args.add_argument('--dataset', default=None, type=str)
+    args.add_argument('--imb_ratio', default=0.1, type=float)
 
     # custom cli options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
