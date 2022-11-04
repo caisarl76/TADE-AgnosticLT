@@ -1,6 +1,6 @@
 {
     "name": "binary_RIDE_places",
-    "n_gpu": 1,
+    "n_gpu": 2,
 
     "arch": {
         "type": "reactnet",
@@ -17,8 +17,8 @@
         "type": "Places_LT",
         "args":{
             "data_dir": "./data/places",
-            "batch_size": 16,
-            "num_workers": 0
+            "batch_size": 256,
+            "num_workers": 4
         }
     },
     "optimizer": {
